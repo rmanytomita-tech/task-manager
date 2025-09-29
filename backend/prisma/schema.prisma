@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーテーブル
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  password    String
+  role        Role     @default(USER)
+  department  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime?
+
+  // リレーション
+  assignedTasks     Task[]             @relation("AssignedUser")
+  relatedTasks      Task[]             @relation("RelatedUsers")
+  createdCategories Category[]
+  createdTemplates  TaskTemplate[]
+  sosNotifications  SOSNotification[]
+
+  @@map("users")
+}
+
+// ロール定義
+enum Role {
+  ADMIN
+  USER
+}
+
+// タスクテーブル
+model Task {
+  id             String      @id @default(cuid())
+  title          String
+  startDate      DateTime
+  endDate        DateTime
+  assignedUserId String
+  categoryId     String
+  priority       Priority    @default(MEDIUM)
+  urgency        Int         @default(3) @db.SmallInt
+  status         TaskStatus  @default(NOT_STARTED)
+  sosFlag        Boolean     @default(false)
+  sosComment     String?
+  clientName     String?
+  projectName    String?
+  memo           String?
+  isDeleted      Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  // リレーション
+  assignedUser     User              @relation("AssignedUser", fields: [assignedUserId], references: [id])
+  category         Category          @relation(fields: [categoryId], references: [id])
+  relatedUsers     User[]            @relation("RelatedUsers")
+  sosNotifications SOSNotification[]
+
+  @@map("tasks")
+}
+
+// 優先度定義
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// タスクステータス定義
+enum TaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// カテゴリテーブル
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  creatorId String
+  createdAt DateTime @default(now())
+
+  // リレーション
+  creator User   @relation(fields: [creatorId], references: [id])
+  tasks   Task[]
+
+  @@map("categories")
+}
+
+// タスクテンプレートテーブル
+model TaskTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  title        String
+  categoryId   String?
+  priority     Priority @default(MEDIUM)
+  urgency      Int      @default(3) @db.SmallInt
+  clientName   String?
+  projectName  String?
+  memo         String?
+  creatorId    String
+  createdAt    DateTime @default(now())
+
+  // リレーション
+  creator User @relation(fields: [creatorId], references: [id])
+
+  @@map("task_templates")
+}
+
+// SOS通知テーブル
+model SOSNotification {
+  id         String    @id @default(cuid())
+  taskId     String
+  userId     String
+  message    String?
+  isResolved Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  // リレーション
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("sos_notifications")
+}
+
+// 一般通知テーブル
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
+
+// 通知タイプ定義
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
