@@ -220,20 +220,6 @@ export const Login: React.FC = () => {
               </Typography>
             </Divider>
 
-            <Box sx={{
-              backgroundColor: 'rgba(0, 0, 0, 0.03)',
-              borderRadius: 1,
-              p: 2,
-              mb: 2
-            }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
-                管理者アカウント
-              </Typography>
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
-                Email: admin@schedule.local<br />
-                Password: Admin@2025!
-              </Typography>
-            </Box>
 
             <Box sx={{
               backgroundColor: 'rgba(0, 0, 0, 0.03)',
