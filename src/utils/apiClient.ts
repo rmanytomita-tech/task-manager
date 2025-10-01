@@ -2,8 +2,10 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ApiResponse } from '../types';
 
-// APIベースURL（開発環境用）
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+// APIベースURL（本番環境では相対パス、開発環境では絶対パス）
+const BASE_URL = process.env.NODE_ENV === 'production'
+  ? '/api'
+  : (process.env.REACT_APP_API_URL || 'http://localhost:3001/api');
 
 // Axiosインスタンスを作成
 const apiClient: AxiosInstance = axios.create({
@@ -12,6 +14,7 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // リクエストインターセプター（認証トークンの付与など）
