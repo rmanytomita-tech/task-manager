@@ -154,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   // ナビゲーションアイテムをレンダリング
   const renderNavItems = (items: NavItem[]) => {
     return items
-      .filter(item => !item.adminOnly || user?.role === 'admin')
+      .filter(item => !item.adminOnly || user?.role.toLowerCase() === 'admin')
       .map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -282,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </List>
 
         {/* 管理者機能 */}
-        {user?.role === 'admin' && (
+        {user?.role.toLowerCase() === 'admin' && (
           <>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ px: 2, py: 1 }}>
@@ -310,9 +310,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip
-              label={user.role === 'admin' ? '管理者' : 'ユーザー'}
+              label={user.role.toLowerCase() === 'admin' ? '管理者' : 'ユーザー'}
               size="small"
-              color={user.role === 'admin' ? 'primary' : 'default'}
+              color={user.role.toLowerCase() === 'admin' ? 'primary' : 'default'}
               sx={{ fontSize: '0.75rem' }}
             />
             <Typography variant="caption" color="text.secondary" noWrap>
