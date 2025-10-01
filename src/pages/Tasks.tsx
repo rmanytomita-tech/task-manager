@@ -386,8 +386,7 @@ export const Tasks: React.FC = () => {
 
                   <TableCell>
                     <Typography variant="body2">
-                      {/* 後で担当者名を取得 */}
-                      {task.assignedUserId}
+                      {task.assignedUser?.name || task.assignedUserId}
                     </Typography>
                   </TableCell>
 
