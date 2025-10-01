@@ -104,7 +104,7 @@ export const TeamLoad: React.FC = () => {
   console.log('=== TEAM LOAD PAGE LOADED ===');
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { tasks, categories } = useTaskStore();
+  const { tasks, categories, loadTasks, loadCategories } = useTaskStore();
 
   // ビュー設定
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
@@ -112,6 +112,12 @@ export const TeamLoad: React.FC = () => {
 
   // ユーザー一覧
   const [users, setUsers] = useState<any[]>([]);
+
+  // データ読み込み
+  useEffect(() => {
+    loadTasks();
+    loadCategories();
+  }, [loadTasks, loadCategories]);
 
   // ユーザー一覧を取得
   useEffect(() => {

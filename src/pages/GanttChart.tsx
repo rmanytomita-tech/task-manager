@@ -1,5 +1,5 @@
 // ガントチャート画面コンポーネント
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -42,7 +42,7 @@ export const GanttChart: React.FC = () => {
   console.log('=== GANTT CHART PAGE LOADED ===');
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { tasks, categories } = useTaskStore();
+  const { tasks, categories, loadTasks, loadCategories } = useTaskStore();
 
   // ビュー設定
   const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -52,6 +52,12 @@ export const GanttChart: React.FC = () => {
   // 現在の日付を基準とした表示範囲
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
+
+  // データ読み込み
+  useEffect(() => {
+    loadTasks();
+    loadCategories();
+  }, [loadTasks, loadCategories]);
 
   // フィルタリングされたタスク
   const filteredTasks = useMemo(() => {
