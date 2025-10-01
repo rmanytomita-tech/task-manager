@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# OpenSSLのインストール（Prisma用）
+RUN apk add --no-cache openssl
+
 # 作業ディレクトリを設定
 WORKDIR /app
 
@@ -11,6 +14,9 @@ RUN npm ci --only=production && npm cache clean --force
 
 # アプリケーションファイルをコピー
 COPY . .
+
+# Prisma Clientを生成
+RUN npx prisma generate
 
 # ログディレクトリを作成
 RUN mkdir -p logs
