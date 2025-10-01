@@ -22,6 +22,7 @@ apiClient.interceptors.request.use(
   (config) => {
     // ローカルストレージからトークンを取得
     const token = localStorage.getItem('auth-token');
+    console.log('API Request:', config.url, 'Token:', token ? 'exists' : 'missing');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
