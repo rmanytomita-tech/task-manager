@@ -18,7 +18,35 @@ const createUserSchema = z.object({
 
 const updateUserSchema = createUserSchema.partial();
 
-// ユーザー一覧取得（管理者のみ）
+// シンプルなユーザー一覧取得（認証済みユーザー全員がアクセス可能）
+router.get('/list', authenticate, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error('ユーザー一覧取得エラー:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ユーザー一覧の取得に失敗しました',
+      error: error.message,
+    });
+  }
+});
+
+// ユーザー一覧取得（管理者のみ - 詳細情報付き）
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const users = await prisma.user.findMany({

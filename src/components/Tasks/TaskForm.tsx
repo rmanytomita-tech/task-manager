@@ -67,7 +67,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, mode })
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const response = await userApi.getUsers();
+        const response = await userApi.getUserList();
         if (response.success && response.data) {
           setUsers(response.data);
         }

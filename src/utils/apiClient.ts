@@ -121,7 +121,11 @@ export const authApi = {
  * ユーザー関連API
  */
 export const userApi = {
-  // ユーザー一覧取得
+  // シンプルなユーザー一覧取得（全認証ユーザー用）
+  getUserList: () =>
+    apiCall<any[]>('GET', '/users/list'),
+
+  // ユーザー一覧取得（管理者用 - 詳細情報付き）
   getUsers: () =>
     apiCall<any[]>('GET', '/users'),
 
