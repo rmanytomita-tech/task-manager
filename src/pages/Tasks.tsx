@@ -158,10 +158,14 @@ export const Tasks: React.FC = () => {
   };
 
   const handleDeleteConfirm = () => {
+    console.log('Delete confirm clicked, selectedTask:', selectedTask);
     if (selectedTask) {
+      console.log('Deleting task:', selectedTask.id);
       deleteTask(selectedTask.id);
       setDeleteDialogOpen(false);
       setSelectedTask(null);
+    } else {
+      console.error('No task selected for deletion');
     }
   };
 

@@ -20,7 +20,7 @@ interface TaskStore {
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
-  deleteTask: (taskId: string) => void;
+  deleteTask: (taskId: string) => Promise<void>;
   toggleSOS: (taskId: string, comment?: string) => void;
 
   // カテゴリ関連アクション
@@ -112,14 +112,24 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     }));
   },
 
-  deleteTask: (taskId) => {
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === taskId
-          ? { ...task, isDeleted: true, updatedAt: new Date() }
-          : task
-      ),
-    }));
+  deleteTask: async (taskId) => {
+    try {
+      const response = await taskApi.deleteTask(taskId);
+      if (response.success) {
+        // ローカル状態を更新（論理削除）
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId
+              ? { ...task, isDeleted: true, updatedAt: new Date() }
+              : task
+          ),
+        }));
+      } else {
+        set({ error: response.error || 'タスクの削除に失敗しました' });
+      }
+    } catch (error: any) {
+      set({ error: error.message || 'タスクの削除に失敗しました' });
+    }
   },
 
   toggleSOS: async (taskId, comment) => {
