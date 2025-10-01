@@ -29,6 +29,7 @@ services:
       PORT: 3001
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
+      TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL}
     ports:
       - "3001:3001"
     depends_on:
