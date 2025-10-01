@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
 const teamsNotificationService = require('../services/teamsNotificationService');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -25,7 +26,7 @@ const createTaskSchema = z.object({
 const updateTaskSchema = createTaskSchema.partial();
 
 // タスク一覧取得
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const {
       assignedUserId,
@@ -85,7 +86,7 @@ router.get('/', async (req, res) => {
 });
 
 // タスク詳細取得
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -130,7 +131,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // タスク作成
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const validatedData = createTaskSchema.parse(req.body);
 
@@ -181,7 +182,7 @@ router.post('/', async (req, res) => {
 });
 
 // タスク更新
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const validatedData = updateTaskSchema.parse(req.body);
@@ -245,7 +246,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // タスク削除（論理削除）
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -279,7 +280,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // SOS発信/解除
-router.patch('/:id/sos', async (req, res) => {
+router.patch('/:id/sos', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { sosFlag, sosComment } = req.body;

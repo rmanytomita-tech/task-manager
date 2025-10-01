@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -12,7 +13,7 @@ const createCategorySchema = z.object({
 });
 
 // カテゴリ一覧取得
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const categories = await prisma.category.findMany({
       include: {
@@ -45,7 +46,7 @@ router.get('/', async (req, res) => {
 });
 
 // カテゴリ作成
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const validatedData = createCategorySchema.parse(req.body);
 
@@ -94,7 +95,7 @@ router.post('/', async (req, res) => {
 });
 
 // カテゴリ削除
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
 

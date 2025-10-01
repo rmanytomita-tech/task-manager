@@ -1,11 +1,12 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // SOS通知一覧取得
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const { resolved } = req.query;
 
@@ -58,7 +59,7 @@ router.get('/', async (req, res) => {
 });
 
 // SOS通知解決
-router.patch('/:id/resolve', async (req, res) => {
+router.patch('/:id/resolve', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { resolverComment } = req.body;
@@ -118,7 +119,7 @@ router.patch('/:id/resolve', async (req, res) => {
 });
 
 // SOS統計取得
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticate, async (req, res) => {
   try {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);

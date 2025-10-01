@@ -1,5 +1,5 @@
 // チーム負荷状況画面コンポーネント
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -42,6 +42,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useTaskStore } from '../stores/taskStore';
 import { calculateTeamLoad, getOverdueTasks, getSOSTasks } from '../utils/taskUtils';
 import { formatDateToShort, getRelativeTime } from '../utils/dateUtils';
+import { userApi } from '../utils/apiClient';
 
 type ViewMode = 'overview' | 'detailed';
 
@@ -109,14 +110,23 @@ export const TeamLoad: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // 仮のユーザーデータ（実際のユーザーストアが実装されるまで）
-  const mockUsers = [
-    { id: 'user1', name: '田中太郎', email: 'tanaka@example.com', role: 'user' as const, createdAt: new Date() },
-    { id: 'user2', name: '佐藤花子', email: 'sato@example.com', role: 'user' as const, createdAt: new Date() },
-    { id: 'user3', name: '鈴木一郎', email: 'suzuki@example.com', role: 'user' as const, createdAt: new Date() },
-    { id: 'user4', name: '高橋美咲', email: 'takahashi@example.com', role: 'user' as const, createdAt: new Date() },
-    { id: 'user5', name: '山田健太', email: 'yamada@example.com', role: 'user' as const, createdAt: new Date() },
-  ];
+  // ユーザー一覧
+  const [users, setUsers] = useState<any[]>([]);
+
+  // ユーザー一覧を取得
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await userApi.getUserList();
+        if (response.success && response.data) {
+          setUsers(response.data);
+        }
+      } catch (error: any) {
+        console.error('ユーザー取得エラー:', error);
+      }
+    };
+    loadUsers();
+  }, []);
 
   // フィルタリングされたタスク
   const filteredTasks = useMemo(() => {
@@ -131,8 +141,8 @@ export const TeamLoad: React.FC = () => {
 
   // チーム負荷状況を計算
   const teamLoad = useMemo(() =>
-    calculateTeamLoad(filteredTasks, mockUsers),
-    [filteredTasks, mockUsers]
+    calculateTeamLoad(filteredTasks, users),
+    [filteredTasks, users]
   );
 
   // 統計情報
@@ -143,14 +153,14 @@ export const TeamLoad: React.FC = () => {
     const totalActiveUsers = teamLoad.filter(user => user.weeklyTaskCount > 0);
 
     return {
-      totalUsers: mockUsers.length,
+      totalUsers: users.length,
       activeUsers: totalActiveUsers.length,
       heavyLoadUsers: heavyLoadUsers.length,
       overdueTasks: overdueTasks.length,
       sosTasks: sosTasks.length,
-      averageWeeklyTasks: teamLoad.reduce((sum, user) => sum + user.weeklyTaskCount, 0) / teamLoad.length,
+      averageWeeklyTasks: teamLoad.length > 0 ? teamLoad.reduce((sum, user) => sum + user.weeklyTaskCount, 0) / teamLoad.length : 0,
     };
-  }, [filteredTasks, teamLoad, mockUsers]);
+  }, [filteredTasks, teamLoad, users]);
 
   // 負荷状況の警告
   const loadWarnings = useMemo(() => {
