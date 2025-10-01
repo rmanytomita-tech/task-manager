@@ -52,6 +52,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const location = useLocation();
 
   console.log('Sidebar - current location:', location.pathname);
+  console.log('Sidebar - user:', user);
+  console.log('Sidebar - user role:', user?.role);
 
   // 未解決のSOS件数を計算
   const sosCount = sosNotifications.filter(n => !n.isResolved).length;
@@ -154,7 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   // ナビゲーションアイテムをレンダリング
   const renderNavItems = (items: NavItem[]) => {
     return items
-      .filter(item => !item.adminOnly || user?.role.toLowerCase() === 'admin')
+      .filter(item => !item.adminOnly || (user?.role && user.role.toLowerCase() === 'admin'))
       .map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -282,7 +284,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </List>
 
         {/* 管理者機能 */}
-        {user?.role.toLowerCase() === 'admin' && (
+        {user?.role && user.role.toLowerCase() === 'admin' && (
           <>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ px: 2, py: 1 }}>
@@ -310,9 +312,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip
-              label={user.role.toLowerCase() === 'admin' ? '管理者' : 'ユーザー'}
+              label={user.role && user.role.toLowerCase() === 'admin' ? '管理者' : 'ユーザー'}
               size="small"
-              color={user.role.toLowerCase() === 'admin' ? 'primary' : 'default'}
+              color={user.role && user.role.toLowerCase() === 'admin' ? 'primary' : 'default'}
               sx={{ fontSize: '0.75rem' }}
             />
             <Typography variant="caption" color="text.secondary" noWrap>

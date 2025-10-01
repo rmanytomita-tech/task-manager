@@ -166,7 +166,7 @@ export const UserManagement: React.FC = () => {
   };
 
   // 管理者権限チェック
-  if (user?.role.toLowerCase() !== 'admin') {
+  if (!user?.role || user.role.toLowerCase() !== 'admin') {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
@@ -221,7 +221,7 @@ export const UserManagement: React.FC = () => {
                   <TableRow key={userData.id}>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {userData.role.toLowerCase() === 'admin' ? (
+                        {userData.role && userData.role.toLowerCase() === 'admin' ? (
                           <AdminIcon color="primary" />
                         ) : (
                           <PersonIcon color="action" />
@@ -232,8 +232,8 @@ export const UserManagement: React.FC = () => {
                     <TableCell>{userData.email}</TableCell>
                     <TableCell>
                       <Chip
-                        label={userData.role.toLowerCase() === 'admin' ? '管理者' : '一般ユーザー'}
-                        color={userData.role.toLowerCase() === 'admin' ? 'primary' : 'default'}
+                        label={userData.role && userData.role.toLowerCase() === 'admin' ? '管理者' : '一般ユーザー'}
+                        color={userData.role && userData.role.toLowerCase() === 'admin' ? 'primary' : 'default'}
                         size="small"
                       />
                     </TableCell>
