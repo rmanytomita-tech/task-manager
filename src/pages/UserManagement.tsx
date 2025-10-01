@@ -42,6 +42,7 @@ import { User } from '../types';
 interface UserFormData {
   name: string;
   email: string;
+  password: string;
   role: 'ADMIN' | 'USER';
   department?: string;
 }
@@ -146,6 +147,7 @@ export const UserManagement: React.FC = () => {
     reset({
       name: user.name,
       email: user.email,
+      password: '', // 編集時はパスワード空欄
       role: user.role.toUpperCase() as 'ADMIN' | 'USER',
       department: user.department || '',
     });
@@ -320,6 +322,29 @@ export const UserManagement: React.FC = () => {
                     type="email"
                     error={!!errors.email}
                     helperText={errors.email?.message}
+                    disabled={loading}
+                  />
+                )}
+              />
+
+              {/* パスワード */}
+              <Controller
+                name="password"
+                control={control}
+                rules={{
+                  required: editingUser ? false : 'パスワードは必須です',
+                  minLength: {
+                    value: 6,
+                    message: 'パスワードは6文字以上で入力してください',
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={editingUser ? 'パスワード（変更する場合のみ入力）' : 'パスワード'}
+                    type="password"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
                     disabled={loading}
                   />
                 )}

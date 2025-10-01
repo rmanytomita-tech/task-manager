@@ -1,6 +1,8 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
+const { authenticate, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -9,14 +11,15 @@ const prisma = new PrismaClient();
 const createUserSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
   email: z.string().email('有効なメールアドレスを入力してください'),
+  password: z.string().min(6, 'パスワードは6文字以上で入力してください'),
   role: z.enum(['ADMIN', 'USER']).default('USER'),
   department: z.string().optional(),
 });
 
 const updateUserSchema = createUserSchema.partial();
 
-// ユーザー一覧取得
-router.get('/', async (req, res) => {
+// ユーザー一覧取得（管理者のみ）
+router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -52,8 +55,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ユーザー詳細取得
-router.get('/:id', async (req, res) => {
+// ユーザー詳細取得（管理者のみ）
+router.get('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -164,14 +167,14 @@ router.get('/load/status', async (req, res) => {
   }
 });
 
-// ユーザー作成
-router.post('/', async (req, res) => {
+// ユーザー作成（管理者のみ）
+router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const validatedData = createUserSchema.parse(req.body);
+    const { email, password, name, department, role } = createUserSchema.parse(req.body);
 
     // メールアドレスの重複チェック
     const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email }
+      where: { email }
     });
 
     if (existingUser) {
@@ -181,8 +184,17 @@ router.post('/', async (req, res) => {
       });
     }
 
+    // パスワードハッシュ化
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     const user = await prisma.user.create({
-      data: validatedData,
+      data: {
+        email,
+        name,
+        department,
+        role,
+        password: hashedPassword,
+      },
       select: {
         id: true,
         email: true,
@@ -217,8 +229,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ユーザー更新
-router.put('/:id', async (req, res) => {
+// ユーザー更新（管理者のみ）
+router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const validatedData = updateUserSchema.parse(req.body);
@@ -281,10 +293,18 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// ユーザー削除
-router.delete('/:id', async (req, res) => {
+// ユーザー削除（管理者のみ）
+router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 自分自身の削除を防ぐ
+    if (id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: '自分自身を削除することはできません',
+      });
+    }
 
     // 削除対象のユーザーが存在するかチェック
     const user = await prisma.user.findUnique({
