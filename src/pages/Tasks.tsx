@@ -154,7 +154,7 @@ export const Tasks: React.FC = () => {
   // 削除機能
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
-    handleMenuClose();
+    setAnchorEl(null); // メニューだけ閉じる（selectedTaskは保持）
   };
 
   const handleDeleteConfirm = () => {
