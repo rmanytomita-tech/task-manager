@@ -58,13 +58,15 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         // データ形式を変換（バックエンドのenum形式をフロントエンドの形式に）
         const tasks = response.data.map((task: any) => ({
           ...task,
-          priority: task.priority.toLowerCase() as 'high' | 'medium' | 'low',
-          status: task.status.toLowerCase().replace('_', '') as 'not_started' | 'in_progress' | 'completed',
+          priority: task.priority?.toLowerCase() as 'high' | 'medium' | 'low',
+          status: task.status?.toLowerCase().replace('_', '') as 'not_started' | 'in_progress' | 'completed',
           startDate: new Date(task.startDate),
           endDate: new Date(task.endDate),
           createdAt: new Date(task.createdAt),
           updatedAt: new Date(task.updatedAt),
+          // assignedUser, category, relatedUsers はそのまま保持
         }));
+        console.log('Loaded tasks:', tasks);
         set({ tasks, isLoading: false });
       } else {
         set({ error: response.error || 'タスクの取得に失敗しました', isLoading: false });
