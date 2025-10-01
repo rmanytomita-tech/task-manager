@@ -42,11 +42,13 @@ const getDefaultValues = (task?: Task): TaskFormData => ({
   startDate: task ? dayjs(task.startDate).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'),
   endDate: task ? dayjs(task.endDate).format('YYYY-MM-DD') : dayjs().add(1, 'day').format('YYYY-MM-DD'),
   assignedUserId: task?.assignedUserId || '',
+  relatedUserIds: task?.relatedUsers?.map(u => u.id) || [],
   categoryId: task?.categoryId || '',
   priority: task?.priority || 'medium',
   urgency: task?.urgency || 3,
   clientName: task?.clientName || '',
   projectName: task?.projectName || '',
+  color: task?.color || '#1976d2',
   relatedUsers: task?.relatedUsers || [],
   memo: task?.memo || '',
   sosFlag: task?.sosFlag || false,
@@ -113,11 +115,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, mode })
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
         assignedUserId: data.assignedUserId || user?.id || '',
+        relatedUserIds: data.relatedUserIds || [],
         categoryId: data.categoryId,
         priority: data.priority.toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW',
         urgency: data.urgency,
         clientName: data.clientName || undefined,
         projectName: data.projectName || undefined,
+        color: data.color || '#1976d2',
         memo: data.memo || undefined,
         sosFlag: data.sosFlag || false,
         sosComment: data.sosComment || undefined,
@@ -282,6 +286,75 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, mode })
                             </Typography>
                           )}
                         </FormControl>
+                      )}
+                    />
+                  </Box>
+
+                  {/* 複数担当者選択 */}
+                  <Controller
+                    name="relatedUserIds"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        multiple
+                        options={users.filter(u => u.id !== watch('assignedUserId'))}
+                        getOptionLabel={(option) => option.name}
+                        value={users.filter(u => field.value?.includes(u.id))}
+                        onChange={(_, newValue) => {
+                          field.onChange(newValue.map(u => u.id));
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="追加担当者（複数選択可）"
+                            placeholder="担当者を選択"
+                          />
+                        )}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => (
+                            <Chip
+                              label={option.name}
+                              {...getTagProps({ index })}
+                              size="small"
+                            />
+                          ))
+                        }
+                      />
+                    )}
+                  />
+
+                  {/* タスク色選択 */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <Controller
+                      name="color"
+                      control={control}
+                      render={({ field }) => (
+                        <Box>
+                          <Typography variant="body2" gutterBottom>
+                            タスクカラー
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                            {['#1976d2', '#2e7d32', '#ed6c02', '#d32f2f', '#9c27b0', '#0288d1', '#f57c00', '#7b1fa2'].map(color => (
+                              <Box
+                                key={color}
+                                onClick={() => field.onChange(color)}
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  backgroundColor: color,
+                                  borderRadius: 1,
+                                  cursor: 'pointer',
+                                  border: field.value === color ? '3px solid #000' : '2px solid #ddd',
+                                  transition: 'all 0.2s',
+                                  '&:hover': {
+                                    transform: 'scale(1.1)',
+                                  }
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
                       )}
                     />
                   </Box>

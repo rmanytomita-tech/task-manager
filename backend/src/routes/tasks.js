@@ -13,11 +13,13 @@ const createTaskSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   assignedUserId: z.string(),
+  relatedUserIds: z.array(z.string()).optional(), // 複数担当者
   categoryId: z.string(),
   priority: z.enum(['HIGH', 'MEDIUM', 'LOW']).default('MEDIUM'),
   urgency: z.number().int().min(1).max(5).default(3),
   clientName: z.string().optional(),
   projectName: z.string().optional(),
+  color: z.string().optional(), // タスクの色
   memo: z.string().optional(),
   sosFlag: z.boolean().default(false),
   sosComment: z.string().optional(),
@@ -134,12 +136,18 @@ router.get('/:id', authenticate, async (req, res) => {
 router.post('/', authenticate, async (req, res) => {
   try {
     const validatedData = createTaskSchema.parse(req.body);
+    const { relatedUserIds, ...taskData } = validatedData;
 
     const task = await prisma.task.create({
       data: {
-        ...validatedData,
+        ...taskData,
         startDate: new Date(validatedData.startDate),
         endDate: new Date(validatedData.endDate),
+        ...(relatedUserIds && relatedUserIds.length > 0 && {
+          relatedUsers: {
+            connect: relatedUserIds.map(id => ({ id }))
+          }
+        }),
       },
       include: {
         assignedUser: {
@@ -147,6 +155,9 @@ router.post('/', authenticate, async (req, res) => {
         },
         category: {
           select: { id: true, name: true }
+        },
+        relatedUsers: {
+          select: { id: true, name: true, email: true }
         },
       },
     });
@@ -186,11 +197,17 @@ router.put('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const validatedData = updateTaskSchema.parse(req.body);
+    const { relatedUserIds, ...taskData } = validatedData;
 
     const updateData = {
-      ...validatedData,
+      ...taskData,
       ...(validatedData.startDate && { startDate: new Date(validatedData.startDate) }),
       ...(validatedData.endDate && { endDate: new Date(validatedData.endDate) }),
+      ...(relatedUserIds !== undefined && {
+        relatedUsers: {
+          set: relatedUserIds.map(id => ({ id }))
+        }
+      }),
     };
 
     const task = await prisma.task.update({
@@ -202,6 +219,9 @@ router.put('/:id', authenticate, async (req, res) => {
         },
         category: {
           select: { id: true, name: true }
+        },
+        relatedUsers: {
+          select: { id: true, name: true, email: true }
         },
       },
     });

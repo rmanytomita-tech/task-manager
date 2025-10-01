@@ -28,6 +28,7 @@ export interface Task {
   sosComment?: string;
   clientName?: string;
   projectName?: string;
+  color?: string; // タスクの色
   relatedUsers?: User[]; // 関連ユーザーオブジェクト配列
   memo?: string;
   isDeleted: boolean;
@@ -102,11 +103,13 @@ export interface TaskFormData {
   startDate: string;
   endDate: string;
   assignedUserId: string;
+  relatedUserIds?: string[]; // 複数担当者のID配列
   categoryId: string;
   priority: Task['priority'];
   urgency: Task['urgency'];
   clientName?: string;
   projectName?: string;
+  color?: string; // タスクの色
   relatedUsers?: User[];
   memo?: string;
   sosFlag?: boolean;

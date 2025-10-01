@@ -54,6 +54,7 @@ model Task {
   sosComment     String?
   clientName     String?
   projectName    String?
+  color          String?     @default("#1976d2") // タスクの色（デフォルトは青）
   memo           String?
   isDeleted      Boolean     @default(false)
   createdAt      DateTime    @default(now())
@@ -62,7 +63,7 @@ model Task {
   // リレーション
   assignedUser     User              @relation("AssignedUser", fields: [assignedUserId], references: [id])
   category         Category          @relation(fields: [categoryId], references: [id])
-  relatedUsers     User[]            @relation("RelatedUsers")
+  relatedUsers     User[]            @relation("RelatedUsers") // 複数担当者
   sosNotifications SOSNotification[]
 
   @@map("tasks")

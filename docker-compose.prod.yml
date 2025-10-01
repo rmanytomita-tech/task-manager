@@ -1,59 +1,62 @@
-version: '3.8'
+  version: '3.8'
 
-services:
-  postgres:
-    image: postgres:15
-    container_name: schedule_postgres_prod
-    environment:
-      POSTGRES_DB: schedule_db
-      POSTGRES_USER: schedule_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-    networks:
-      - schedule_network
+  services:
+    postgres:
+      image: postgres:15
+      container_name: schedule_postgres_prod
+      environment:
+        POSTGRES_DB: schedule_db
+        POSTGRES_USER: schedule_user
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ports:
+        - "5432:5432"
+      volumes:
+        -
+  postgres_data:/var/lib/postgresql/data
+      restart: unless-stopped
+      networks:
+        - schedule_network
 
-  api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: schedule_api_prod
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://schedule_user:${POSTGRES_PASSWORD}@postgres:5432/schedule_db
-      PORT: 3001
-      JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: ${FRONTEND_URL}
-      TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL}
-    ports:
-      - "3001:3001"
-    depends_on:
-      - postgres
-    restart: unless-stopped
-    networks:
-      - schedule_network
+    api:
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      container_name: schedule_api_prod
+      environment:
+        NODE_ENV: production
+        DATABASE_URL:
+  postgresql://schedule_user:${POSTGRES_PASSWOR
+  D}@postgres:5432/schedule_db
+        PORT: 3001
+        JWT_SECRET: ${JWT_SECRET}
+        FRONTEND_URL: https://rmany.duckdns.org
+      ports:
+        - "3001:3001"
+      depends_on:
+        - postgres
+      restart: unless-stopped
+      networks:
+        - schedule_network
 
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: schedule_frontend_prod
-    ports:
-      - "80:80"
-    depends_on:
-      - api
-    restart: unless-stopped
-    networks:
-      - schedule_network
+    frontend:
+      build:
+        context: .
+        dockerfile: Dockerfile.frontend
+      container_name: schedule_frontend_prod
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - /etc/letsencrypt:/etc/letsencrypt:ro
+      depends_on:
+        - api
+      restart: unless-stopped
+      networks:
+        - schedule_network
 
-volumes:
-  postgres_data:
+  volumes:
+    postgres_data:
 
-networks:
-  schedule_network:
-    driver: bridge
+  networks:
+    schedule_network:
+      driver: bridge
