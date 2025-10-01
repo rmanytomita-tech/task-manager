@@ -63,23 +63,33 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, task, mode })
     defaultValues: getDefaultValues(task),
   });
 
-  // ユーザー一覧を読み込み
+  // ユーザー一覧とカテゴリを読み込み
   useEffect(() => {
-    const loadUsers = async () => {
+    const loadData = async () => {
       try {
-        const response = await userApi.getUserList();
-        if (response.success && response.data) {
-          setUsers(response.data);
+        console.log('Loading users and categories...');
+
+        // ユーザー一覧を取得
+        const userResponse = await userApi.getUserList();
+        console.log('User list response:', userResponse);
+        if (userResponse.success && userResponse.data) {
+          setUsers(userResponse.data);
+          console.log('Users loaded:', userResponse.data);
+        } else {
+          console.error('Failed to load users:', userResponse.error);
         }
+
+        // カテゴリを取得
+        await loadCategories();
       } catch (error: any) {
-        console.error('ユーザー取得エラー:', error);
+        console.error('データ取得エラー:', error);
       }
     };
 
     if (open) {
-      loadUsers();
+      loadData();
     }
-  }, [open]);
+  }, [open, loadCategories]);
 
   // ダイアログが開かれた時にフォームをリセット
   useEffect(() => {
