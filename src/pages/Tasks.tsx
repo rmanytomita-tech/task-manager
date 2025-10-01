@@ -175,7 +175,7 @@ export const Tasks: React.FC = () => {
   const handleEditTaskClick = () => {
     setTaskFormMode('edit');
     setTaskFormOpen(true);
-    handleMenuClose();
+    setAnchorEl(null); // メニューだけ閉じる（selectedTaskは保持）
   };
 
   const handleTaskFormClose = () => {
