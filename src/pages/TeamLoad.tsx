@@ -172,12 +172,12 @@ export const TeamLoad: React.FC = () => {
       warnings.push(`${heavyUsers.length}名のメンバーが過負荷状態です`);
     }
 
-    if (lightUsers.length > mockUsers.length / 2) {
+    if (users.length > 0 && lightUsers.length > users.length / 2) {
       warnings.push('チーム全体のタスク配分を見直すことをお勧めします');
     }
 
     return warnings;
-  }, [teamLoad, mockUsers]);
+  }, [teamLoad, users]);
 
   return (
     <Box>
