@@ -8,8 +8,20 @@ const PORT = process.env.PORT || 3001;
 
 // ミドルウェア設定
 app.use(helmet());
+
+// CORS設定
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
+
+// 本番環境のフロントエンドURLを追加
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: [process.env.FRONTEND_URL || 'http://localhost:3000', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: allowedOrigins,
   credentials: true,
 }));
 
@@ -54,5 +66,5 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Schedule API Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 CORS enabled for: http://localhost:3000, http://localhost:3001`);
+  console.log(`🌐 CORS enabled for: ${allowedOrigins.join(', ')}`);
 });
